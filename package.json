@@ -6,6 +6,7 @@
     "scripts": {
         "prepare": "husky install",
         "build": "rimraf dist && tsc",
+        "dev": "npm run build && node dist/src/index.js",
         "lint": "eslint . --ext .ts",
         "test": "jest --coverage",
         "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts' './*.js' './*.json' '!./package-lock.json'"
