@@ -7,10 +7,10 @@ export class ManagedPgRepository extends PgRepository {
     }
 
     async connect(): Promise<void> {
-        await super.client.connect();
+        await this.client.connect();
     }
 
     async cleanUp(): Promise<void> {
-        await super.client.end();
+        await this.client.end();
     }
 }

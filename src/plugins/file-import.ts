@@ -10,12 +10,12 @@ export class FileImport implements ImportStrategy {
     private _parishFilePath: string;
     private _postcodeFilePaths: string[];
 
-    parishes(): fs.ReadStream {
-        return this.createStream(this._parishFilePath);
+    parishes(): { filePath: string; stream: fs.ReadStream } {
+        return { filePath: this._parishFilePath, stream: this.createStream(this._parishFilePath) };
     }
 
-    postcodes(postcodeFilePath: string): fs.ReadStream {
-        return this.createStream(postcodeFilePath);
+    postcodes(postcodeFilePath: string): { filePath: string; stream: fs.ReadStream } {
+        return { filePath: postcodeFilePath, stream: this.createStream(postcodeFilePath) };
     }
 
     postcodeFilePaths() {
