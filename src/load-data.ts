@@ -16,6 +16,9 @@ export const loadData = async (importStrategy: ImportStrategy, repository: Repos
         const parishFile = importStrategy.parishes();
         await importCsv(parishFile.filePath, parishFile.stream, (data) => repository.upsertParish(data['PARNCP21CD'], data['PARNCP21NM']), observer);
 
+        const countyFile = importStrategy.counties();
+        await importCsv(countyFile.filePath, countyFile.stream, (data) => repository.upsertCounties(data['CTY21CD'], data['CTY21NM']), observer);
+
         for (const postodeFilePath of importStrategy.postcodeFilePaths()) {
             const { filePath, stream } = importStrategy.postcodes(postodeFilePath);
             await importCsv(

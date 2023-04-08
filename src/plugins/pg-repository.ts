@@ -22,6 +22,23 @@ export class PgRepository implements Repository {
         }
     }
 
+    async upsertCounties(cty21cd: string, cty21nm: string) {
+        const data = [cty21cd, cty21nm];
+
+        await this.client.query('BEGIN');
+        try {
+            await this.client.query('UPDATE onsspd.counties SET cty21cd=$1::text, cty21nm=$2::text, updatedAt = current_timestamp WHERE cty21cd=$1::text;', data);
+            await this.client.query(
+                'INSERT INTO onsspd.counties (cty21cd, cty21nm, createdAt) SELECT $1::text, $2::text, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM onsspd.counties WHERE cty21cd=$1::text);',
+                data
+            );
+            await this.client.query('COMMIT');
+        } catch (error: any) {
+            await this.client.query('ROLLBACK');
+            throw error;
+        }
+    }
+
     async upsertParish(parncp21cd: string, parncp21nm: string) {
         const data = [parncp21cd, parncp21nm];
 
