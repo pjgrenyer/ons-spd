@@ -10,7 +10,9 @@ export const loadData = async (importStrategy: ImportStrategy, repository: Repos
     await observer.onStart();
     await repository.connect();
     try {
+        await seedGridReferencePositionalQualityIndicators(repository);
         await preSeedParishes(repository);
+
         const parishFile = importStrategy.parishes();
         await importCsv(parishFile.filePath, parishFile.stream, (data) => repository.upsertParish(data['PARNCP21CD'], data['PARNCP21NM']), observer);
 
@@ -31,6 +33,20 @@ export const loadData = async (importStrategy: ImportStrategy, repository: Repos
         repository.cleanUp();
     }
     await observer.onFinish();
+};
+
+const seedGridReferencePositionalQualityIndicators = async (repository: Repository) => {
+    repository.upsertGridReferencePositionalQualityIndicator(1, 'within the building of the matched address closest to the postcode mean');
+    repository.upsertGridReferencePositionalQualityIndicator(
+        2,
+        'within the building of the matched address closest to the postcode mean,  by visual inspection of Landline maps (Scotland only)'
+    );
+    repository.upsertGridReferencePositionalQualityIndicator(3, 'approximate to within 50 metres');
+    repository.upsertGridReferencePositionalQualityIndicator(4, 'postcode unit mean (mean of matched addresses with the same postcode, but not snapped to a building)');
+    repository.upsertGridReferencePositionalQualityIndicator(5, 'imputed by ONS, by reference to surrounding postcode grid references');
+    repository.upsertGridReferencePositionalQualityIndicator(6, 'postcode sector mean, (mainly PO Boxes)');
+    repository.upsertGridReferencePositionalQualityIndicator(8, 'postcode terminated prior to Gridlink ® initiative, last known ONS postcode grid reference 1');
+    repository.upsertGridReferencePositionalQualityIndicator(9, 'no grid reference available');
 };
 
 const unknown = '<unknown>';
