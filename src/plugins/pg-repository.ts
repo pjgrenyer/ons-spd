@@ -21,16 +21,16 @@ export class PgRepository implements Repository {
         }
     }
 
-    async upsertPostcodes(pcds: string, parish: string, oseast1m: number, osnrth1m: number) {
-        const data = [pcds, parish, oseast1m, osnrth1m];
+    async upsertPostcodes(pcds: string, parish: string, oseast1m: number, osnrth1m: number, longitude: number, latitude: number) {
+        const data = [pcds, parish, oseast1m, osnrth1m, longitude, latitude];
         await this.client.query('BEGIN');
         try {
             await this.client.query(
-                'UPDATE public.postcodes SET pcds=$1::text, parish=$2::text, oseast1m=$3, osnrth1m = $4, updatedAt = current_timestamp WHERE pcds=$1::text;',
+                'UPDATE public.postcodes SET pcds=$1::text, parish=$2::text, oseast1m=$3, osnrth1m = $4, longitude = $5, latitude = $6, updatedAt = current_timestamp WHERE pcds=$1::text;',
                 data
             );
             await this.client.query(
-                'INSERT INTO public.postcodes (pcds, parish, oseast1m, osnrth1m, createdAt) SELECT $1::text, $2::text, $3, $4, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM public.postcodes WHERE pcds=$1::text);',
+                'INSERT INTO public.postcodes (pcds, parish, oseast1m, osnrth1m, longitude, latitude, createdAt) SELECT $1::text, $2::text, $3, $4, $5, $6, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM public.postcodes WHERE pcds=$1::text);',
                 data
             );
             await this.client.query('COMMIT');

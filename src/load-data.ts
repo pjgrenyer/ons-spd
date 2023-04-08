@@ -4,6 +4,7 @@ import { Repository } from './repository';
 import { ReadStream } from 'fs';
 import { NullLoadObserver } from './plugins/null-load-observer';
 import { LoadObserver } from './load-observer';
+import OSPoint from 'ospoint';
 
 export const loadData = async (importStrategy: ImportStrategy, repository: Repository, observer = new NullLoadObserver()) => {
     await observer.onStart();
@@ -18,7 +19,11 @@ export const loadData = async (importStrategy: ImportStrategy, repository: Repos
             await importCsv(
                 filePath,
                 stream,
-                (data) => repository.upsertPostcodes(data['pcds'], toUnknownIfEmptyOrNull(data['parish']), +data['oseast1m'], +data['osnrth1m']),
+                (data: any) => {
+                    const point = new OSPoint(data['osnrth1m'], data['oseast1m']);
+                    const { longitude, latitude } = point.toWGS84();
+                    return repository.upsertPostcodes(data['pcds'], toUnknownIfEmptyOrNull(data['parish']), +data['oseast1m'], +data['osnrth1m'], longitude, latitude);
+                },
                 observer
             );
         }
