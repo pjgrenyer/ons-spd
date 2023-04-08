@@ -24,7 +24,15 @@ export const loadData = async (importStrategy: ImportStrategy, repository: Repos
                 (data: any) => {
                     const point = new OSPoint(data['osnrth1m'], data['oseast1m']);
                     const { longitude, latitude } = point.toWGS84();
-                    return repository.upsertPostcodes(data['pcds'], toUnknownIfEmptyOrNull(data['parish']), +data['oseast1m'], +data['osnrth1m'], longitude, latitude);
+                    return repository.upsertPostcodes(
+                        data['pcds'],
+                        toUnknownIfEmptyOrNull(data['parish']),
+                        +data['oseast1m'],
+                        +data['osnrth1m'],
+                        +data['osgrdind'],
+                        longitude,
+                        latitude
+                    );
                 },
                 observer
             );

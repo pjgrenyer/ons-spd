@@ -16,10 +16,15 @@ create table onsspd.postcodes (
 	parish varchar(15) NOT null,
 	oseast1m integer,
 	osnrth1m integer,
+	osgrdind integer NOT null,
 	longitude decimal,
 	latitude decimal,
 	createdAt timestamp not null,
 	updatedAt timestamp null,
+	
+	constraint fk_grid_reference_positional_quality_indicator_postcodes
+     foreign key (osgrdind) 
+     REFERENCES onsspd.grid_reference_positional_quality_indicator (osgrdind),
 	
 	constraint fk_parishes_postcodes
      foreign key (parish) 
