@@ -22,7 +22,26 @@ export class PgRepository implements Repository {
         }
     }
 
-    async upsertCounties(cty21cd: string, cty21nm: string) {
+    async upsertCountry(ctry12cn: string, ctry12cdo: string, ctry12nm: string, ctry12nmw: string) {
+        const data = [ctry12cn, ctry12cdo, ctry12nm, ctry12nmw];
+        await this.client.query('BEGIN');
+        try {
+            await this.client.query(
+                'UPDATE onsspd.countries SET ctry12cn = $1, ctry12cdo = $2, ctry12nm = $3, ctry12nmw = $4, updatedAt = current_timestamp WHERE ctry12cn=$1;',
+                data
+            );
+            await this.client.query(
+                'INSERT INTO onsspd.countries (ctry12cn, ctry12cdo, ctry12nm, ctry12nmw, createdAt) SELECT $1::text, $2, $3::text, $4::text, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM onsspd.countries WHERE ctry12cn=$1);',
+                data
+            );
+            await this.client.query('COMMIT');
+        } catch (error: any) {
+            await this.client.query('ROLLBACK');
+            throw error;
+        }
+    }
+
+    async upsertCounty(cty21cd: string, cty21nm: string) {
         const data = [cty21cd, cty21nm];
 
         await this.client.query('BEGIN');
@@ -56,16 +75,28 @@ export class PgRepository implements Repository {
         }
     }
 
-    async upsertPostcodes(pcds: string, parish: string, oseast1m: number, osnrth1m: number, osgrdind: number, longitude: number, latitude: number) {
-        const data = [pcds, parish, oseast1m, osnrth1m, osgrdind, longitude, latitude];
+    async upsertPostcodes(
+        pcds: string,
+        dointr: number,
+        doterm: number,
+        parish: string,
+        oscty: string,
+        ctry: string,
+        oseast1m: number,
+        osnrth1m: number,
+        osgrdind: number,
+        longitude: number,
+        latitude: number
+    ) {
+        const data = [pcds, dointr, doterm, parish, oscty, ctry, oseast1m, osnrth1m, osgrdind, longitude, latitude];
         await this.client.query('BEGIN');
         try {
             await this.client.query(
-                'UPDATE onsspd.postcodes SET pcds=$1::text, parish=$2::text, oseast1m=$3, osnrth1m = $4, osgrdind = $5, longitude = $6, latitude = $7, updatedAt = current_timestamp WHERE pcds=$1::text;',
+                'UPDATE onsspd.postcodes SET pcds=$1::text, dointr = $2, doterm = $3, parish=$4::text, oscty=$5::text, ctry=$6::text, oseast1m=$7, osnrth1m = $8, osgrdind = $9, longitude = $10, latitude = $11, updatedAt = current_timestamp WHERE pcds=$1::text;',
                 data
             );
             await this.client.query(
-                'INSERT INTO onsspd.postcodes (pcds, parish, oseast1m, osnrth1m, osgrdind, longitude, latitude, createdAt) SELECT $1::text, $2::text, $3, $4, $5, $6, $7, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM onsspd.postcodes WHERE pcds=$1::text);',
+                'INSERT INTO onsspd.postcodes (pcds, dointr, doterm, parish, oscty, ctry, oseast1m, osnrth1m, osgrdind, longitude, latitude, createdAt) SELECT $1::text, $2, $3, $4::text, $5::text, $6::text, $7, $8, $9, $10, $11, current_timestamp WHERE NOT EXISTS (SELECT 1 FROM onsspd.postcodes WHERE pcds=$1::text);',
                 data
             );
             await this.client.query('COMMIT');

@@ -11,13 +11,22 @@ export const loadData = async (importStrategy: ImportStrategy, repository: Repos
     await repository.connect();
     try {
         await seedGridReferencePositionalQualityIndicators(repository);
-        await preSeedParishes(repository);
 
+        const countryFile = importStrategy.countries();
+        await importCsv(
+            countryFile.filePath,
+            countryFile.stream,
+            (data) => repository.upsertCountry(data['CTRY12CD'], data['CTRY12CDO'], data['CTRY12NM'], data['CTRY12NMW']),
+            observer
+        );
+
+        await preSeedCounties(repository);
+        const countyFile = importStrategy.counties();
+        await importCsv(countyFile.filePath, countyFile.stream, (data) => repository.upsertCounty(data['CTY21CD'], data['CTY21NM']), observer);
+
+        await preSeedParishes(repository);
         const parishFile = importStrategy.parishes();
         await importCsv(parishFile.filePath, parishFile.stream, (data) => repository.upsertParish(data['PARNCP21CD'], data['PARNCP21NM']), observer);
-
-        const countyFile = importStrategy.counties();
-        await importCsv(countyFile.filePath, countyFile.stream, (data) => repository.upsertCounties(data['CTY21CD'], data['CTY21NM']), observer);
 
         for (const postodeFilePath of importStrategy.postcodeFilePaths()) {
             const { filePath, stream } = importStrategy.postcodes(postodeFilePath);
@@ -29,7 +38,11 @@ export const loadData = async (importStrategy: ImportStrategy, repository: Repos
                     const { longitude, latitude } = point.toWGS84();
                     return repository.upsertPostcodes(
                         data['pcds'],
+                        +data['dointr'],
+                        +data['doterm'],
                         toUnknownIfEmptyOrNull(data['parish']),
+                        toUnknownIfEmptyOrNull(data['oscty']),
+                        data['ctry'],
                         +data['oseast1m'],
                         +data['osnrth1m'],
                         +data['osgrdind'],
@@ -78,6 +91,10 @@ const preSeedParishes = async (repository: Repository) => {
     await repository.upsertParish('N99999999', 'Northern Ireland');
     await repository.upsertParish('L99999999', 'Channel Islands');
     await repository.upsertParish('M99999999', 'Isle of Man');
+};
+
+const preSeedCounties = async (repository: Repository) => {
+    await repository.upsertCounty(unknown, unknown);
 };
 
 const importCsv = async (filePath: string, stream: ReadStream, handler: (data: any, lineNumber: number) => Promise<void>, observer: LoadObserver): Promise<number> => {
