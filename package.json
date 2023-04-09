@@ -6,6 +6,7 @@
     "scripts": {
         "prepare": "husky install",
         "build": "rimraf dist && tsc",
+        "dev": "npm run build && node dist/src/index.js",
         "lint": "eslint . --ext .ts",
         "test": "jest --coverage",
         "format": "prettier --write 'src/**/*.ts' 'test/**/*.ts' './*.js' './*.json' '!./package-lock.json'"
@@ -13,13 +14,17 @@
     "author": "Paul Grenyer",
     "license": "ISC",
     "dependencies": {
+        "csvtojson": "^2.0.10",
         "husky": "^8.0.3",
+        "ospoint": "^0.2.1",
+        "pg": "^8.10.0",
         "typescript": "^5.0.3"
     },
     "devDependencies": {
         "@babel/preset-env": "^7.21.4",
         "@babel/preset-typescript": "^7.21.4",
         "@types/jest": "^29.5.0",
+        "@types/pg": "^8.6.6",
         "@types/supertest": "^2.0.12",
         "@typescript-eslint/eslint-plugin": "^5.57.1",
         "@typescript-eslint/parser": "^5.57.1",
