@@ -36,18 +36,23 @@ export const loadData = async (importStrategy: ImportStrategy, repository: Repos
                 (data: any) => {
                     const point = new OSPoint(data['osnrth1m'], data['oseast1m']);
                     const { longitude, latitude } = point.toWGS84();
+
+                    const termDate = data['doterm'] ? +data['doterm'] : null;
+                    const easting = data['oseast1m'] ? +data['oseast1m'] : null;
+                    const northing = data['osnrth1m'] ? +data['osnrth1m'] : null;
+
                     return repository.upsertPostcodes(
                         data['pcds'],
                         +data['dointr'],
-                        +data['doterm'],
+                        termDate,
                         toUnknownIfEmptyOrNull(data['parish']),
                         toUnknownIfEmptyOrNull(data['oscty']),
                         data['ctry'],
-                        +data['oseast1m'],
-                        +data['osnrth1m'],
+                        easting,
+                        northing,
                         +data['osgrdind'],
-                        longitude,
-                        latitude
+                        !isNaN(longitude) ? longitude : null,
+                        !isNaN(latitude) ? latitude : null
                     );
                 },
                 observer
