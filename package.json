@@ -1,8 +1,9 @@
 {
     "name": "ons-spd",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "ons-spd",
-    "main": "index.js",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "scripts": {
         "prepare": "husky install",
         "build": "rimraf dist && tsc",
