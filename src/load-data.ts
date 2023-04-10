@@ -34,25 +34,20 @@ export const loadData = async (importStrategy: ImportStrategy, repository: Repos
                 filePath,
                 stream,
                 (data: any) => {
-                    const point = new OSPoint(data['osnrth1m'], data['oseast1m']);
-                    const { longitude, latitude } = point.toWGS84();
-
-                    const termDate = data['doterm'] ? +data['doterm'] : null;
-                    const easting = data['oseast1m'] ? +data['oseast1m'] : null;
-                    const northing = data['osnrth1m'] ? +data['osnrth1m'] : null;
+                    const { northing, easting, longitude, latitude } = getGeoCords(data['osnrth1m'], data['oseast1m']);
 
                     return repository.upsertPostcodes(
                         data['pcds'],
                         +data['dointr'],
-                        termDate,
+                        data['doterm'] ? +data['doterm'] : null,
                         toUnknownIfEmptyOrNull(data['parish']),
                         toUnknownIfEmptyOrNull(data['oscty']),
                         data['ctry'],
                         easting,
                         northing,
                         +data['osgrdind'],
-                        !isNaN(longitude) ? longitude : null,
-                        !isNaN(latitude) ? latitude : null
+                        longitude,
+                        latitude
                     );
                 },
                 observer
@@ -100,6 +95,30 @@ const preSeedParishes = async (repository: Repository) => {
 
 const preSeedCounties = async (repository: Repository) => {
     await repository.upsertCounty(unknown, unknown);
+};
+
+const getGeoCords = (osnrth1m: string, oseast1m: string): { easting: number | null; northing: number | null; longitude: number | null; latitude: number | null } => {
+    const easting = oseast1m ? +oseast1m : null;
+    const northing = osnrth1m ? +osnrth1m : null;
+
+    if (!easting || !northing) {
+        return {
+            easting,
+            northing,
+            longitude: null,
+            latitude: null,
+        };
+    }
+
+    const point = new OSPoint(osnrth1m, oseast1m);
+    const { longitude, latitude } = point.toWGS84();
+
+    return {
+        easting,
+        northing,
+        longitude,
+        latitude,
+    };
 };
 
 const importCsv = async (filePath: string, stream: ReadStream, handler: (data: any, lineNumber: number) => Promise<void>, observer: LoadObserver): Promise<number> => {
